@@ -1,6 +1,10 @@
+from ast import mod
 import imp
+from re import T
 from django.db import models
 import random
+
+from numpy import integer
 # from django.core.validators import MinValueValidator, MaxValueValidator
 class Tag(models.Model):
     name = models.CharField(max_length=100)
@@ -20,25 +24,32 @@ class Word(models.Model):
     archive = models.BooleanField(default=False)
     played_counter = models.IntegerField(default=0)
 
-    # default fields from dataset
-    word_slice = models.CharField(max_length=30)
-    word_answerA = models.CharField(max_length=30, null=True)
-    word_probaA = models.DecimalField(max_digits=5, decimal_places=4)
-    word_answerB = models.CharField(max_length=30, null=True)
-    word_probaB = models.DecimalField(max_digits=5, decimal_places=4)
-    word_hmAnswerA = models.CharField(max_length=30, null=True)
-    word_hmAnswerb = models.CharField(max_length=30, null=True)
-    word_hmRatio = models.DecimalField(max_digits=5, decimal_places=4)
-    word_otherRatio = models.DecimalField(max_digits=5, decimal_places=4)
+    # default fields from dataset (ver1)
+    # word_slice = models.CharField(max_length=30)
+    # word_answerA = models.CharField(max_length=30, null=True)
+    # word_probaA = models.DecimalField(max_digits=5, decimal_places=4)
+    # word_answerB = models.CharField(max_length=30, null=True)
+    # word_probaB = models.DecimalField(max_digits=5, decimal_places=4)
+    # word_hmAnswerA = models.CharField(max_length=30, null=True)
+    # word_hmAnswerb = models.CharField(max_length=30, null=True)
+    # word_hmRatio = models.DecimalField(max_digits=5, decimal_places=4)
+    # word_otherRatio = models.DecimalField(max_digits=5, decimal_places=4)
+
+    # default fields from dataset (ver2)
+    word_IID = models.IntegerField(null=True)
+    word_code = models.IntegerField(null=True)
+    word_code_parent = models.IntegerField(null=True)
+    word_gender = models.CharField(max_length=3, null=True)
+    word_soul = models.BooleanField(null=True)
 
     @staticmethod
     def get_words_set(num_teams, words_per_team):
         num_words = num_teams * words_per_team
-        words = Word.objects.filter(archive=False).values('word').distinct()
+        words = Word.objects.filter(archive=False).values('term').distinct()
         if words.count() < num_words:
             raise Exception('Not enough unique words in the database.')
         words_set = random.sample(list(words), num_words)
-        return [word['word'] for word in words_set]
+        return [word['term'] for word in words_set]
     
     @staticmethod
     def get_word_and_increment_counter(word_id):
